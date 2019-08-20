@@ -1,0 +1,68 @@
+# Change this if youd like to expose Spinnaker outside the cluster
+ingress:
+  enabled: false
+    # host: spinnaker.example.org
+    # annotations:
+    # ingress.kubernetes.io/ssl-redirect: 'true'
+    # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
+  # tls:
+  #  - secretName: -tls
+  #    hosts:
+  #      - domain.com
+
+ingressGate:
+  enabled: false
+    # host: gate.spinnaker.example.org
+    # annotations:
+    # ingress.kubernetes.io/ssl-redirect: 'true'
+    # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
+  # tls:
+  #  - secretName: -tls
+  #    hosts:
+  #      - domain.com
+
+# spinnakerFeatureFlags is a list of Spinnaker feature flags to enable
+# Ref: https://www.spinnaker.io/reference/halyard/commands/#hal-config-features-edit
+# spinnakerFeatureFlags:
+#   - artifacts
+#   - pipeline-templates
+spinnakerFeatureFlags:
+  - artifacts
+  - jobs
+  - pipeline-templates
+
+# Node labels for pod assignment
+# Ref: https://kubernetes.io/docs/user-guide/node-selection/
+# nodeSelector to provide to each of the Spinnaker components
+nodeSelector: {}
+
+redis:
+  enabled: false
+
+minio:
+  enabled: false
+
+# Azure Storage Account
+azs:
+  enabled: true
+  storageAccountName: ${storage_account}
+  accessKey: ${storage_access_key}
+  containerName: ${storage_container_name}
+
+rbac:
+  # Specifies whether RBAC resources should be created
+  create: true
+
+serviceAccount:
+  # Specifies whether a ServiceAccount should be created
+  create: true
+  # The name of the ServiceAccounts to use.
+  # If left blank it is auto-generated from the fullname of the release
+  halyardName: halyard
+  spinnakerName: spinnaker
+securityContext:
+  # Specifies permissions to write for user/group
+  runAsUser: 1000
+  fsGroup: 1000

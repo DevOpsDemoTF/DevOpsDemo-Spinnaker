@@ -7,3 +7,10 @@
 
 # .tfvars files
 *.tfvars
+
+# backend config
+backend.tf
+
+# IDE folders
+.idea/
+.vscode/

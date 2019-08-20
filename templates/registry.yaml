@@ -1,0 +1,10 @@
+# Define which registries and repositories you want available in your
+# Spinnaker pipeline definitions
+# For more info visit:
+#   https://www.spinnaker.io/setup/providers/docker-registry/
+
+# Configure your Docker registries here
+dockerRegistries:
+  - name: ${name}
+    address: ${address}
+    username: ${username}
