@@ -11,3 +11,9 @@ resource "azurerm_role_assignment" "spinnaker_acr" {
   scope = azurerm_container_registry.registry.id
   role_definition_name = "AcrPush"
 }
+
+resource "azurerm_role_assignment" "kubernetes_acr" {
+  principal_id = var.k8s_service_principal
+  scope = azurerm_container_registry.registry.id
+  role_definition_name = "AcrPull"
+}
