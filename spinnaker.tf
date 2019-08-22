@@ -66,5 +66,5 @@ resource "azurerm_storage_account" "spinnaker" {
 resource "azurerm_storage_container" "spinnaker" {
   name = "spinnaker"
   storage_account_name = azurerm_storage_account.spinnaker.name
-  container_access_type = "private"
+  container_access_type = "container"
 }
