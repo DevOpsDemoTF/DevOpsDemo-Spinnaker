@@ -32,14 +32,30 @@ spinnakerFeatureFlags:
   - artifacts
   - jobs
   - pipeline-templates
+  - infrastructure-stages
 
 # Node labels for pod assignment
 # Ref: https://kubernetes.io/docs/user-guide/node-selection/
 # nodeSelector to provide to each of the Spinnaker components
 nodeSelector: {}
 
+# Redis password to use for the in-cluster redis service
+# Enable redis to use in-cluster redis
 redis:
-  enabled: false
+  enabled: true
+  # External Redis option will be enabled if in-cluster redis is disabled
+  external:
+    host: "localhost"
+    port: 6379
+    # password: ""
+  password: password
+  nodeSelector: {}
+  cluster:
+    enabled: false
+# Uncomment if you don't want to create a PVC for redis
+  master:
+    persistence:
+      enabled: false
 
 minio:
   enabled: false
@@ -62,6 +78,7 @@ serviceAccount:
   # If left blank it is auto-generated from the fullname of the release
   halyardName: halyard
   spinnakerName: spinnaker
+
 securityContext:
   # Specifies permissions to write for user/group
   runAsUser: 1000

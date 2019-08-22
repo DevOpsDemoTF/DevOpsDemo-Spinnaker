@@ -1,11 +1,7 @@
 halyard:
-  spinnakerVersion: 1.12.5
-  image:
-    repository: gcr.io/spinnaker-marketplace/halyard
-    tag: 1.20.2
   # Set to false to disable persistence data volume for halyard
   persistence:
-    enabled: true
+    enabled: false
   # Provide a config map with Hal commands that will be run the core config (storage)
   # The config map should contain a script in the config.sh key
   additionalScripts:
@@ -66,13 +62,13 @@ halyard:
 
   ## Uncomment the following resources definitions to control the cpu and memory
   # resources allocated for the halyard pod
-  resources: {}
-    # requests:
-    #   memory: "1Gi"
-    #   cpu: "100m"
-    # limits:
-  #   memory: "2Gi"
-  #   cpu: "200m"
+  resources:
+    limits:
+      cpu: 1
+      memory: 2Gi
+    requests:
+      cpu: 250m
+      memory: 1Gi
 
   ## Uncomment if you want to set environment variables on the Halyard pod.
   # env:
@@ -82,3 +78,83 @@ halyard:
     ## Enable to override the default cacerts with your own one
     enabled: false
     secretName: custom-cacerts
+
+deploymentEnvironment:
+  customSizing:
+    spin-front50:
+      limits:
+        cpu: 250m
+        memory: 2Gi
+      requests:
+        cpu: 100m
+        memory: 2Gi
+    spin-clouddriver:
+      limits:
+        cpu: 1
+        memory: 2Gi
+      requests:
+        cpu: 250m
+        memory: 2Gi
+    spin-clouddriver-bootstrap:
+      limits:
+        cpu: 1
+        memory: 2Gi
+      requests:
+        cpu: 250m
+        memory: 2Gi
+    spin-redis:
+      limits:
+        cpu: 250m
+        memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    spin-deck:
+      limits:
+        cpu: 250m
+        memory: 64Mi
+      requests:
+        cpu: 100m
+        memory: 64Mi
+    spin-gate:
+      limits:
+        cpu: 250m
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 1Gi
+    spin-orca-bootstrap:
+      limits:
+        cpu: 1
+        memory: 2Gi
+      requests:
+        cpu: 250m
+        memory: 2Gi
+    spin-igor:
+      limits:
+        cpu: 250m
+        memory: 768Mi
+      requests:
+        cpu: 100m
+        memory: 768Mi
+    spin-rosco:
+      limits:
+        cpu: 250m
+        memory: 768Mi
+      requests:
+        cpu: 100m
+        memory: 768Mi
+    spin-echo:
+      limits:
+        cpu: 250m
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 1Gi
+    spin-orca:
+      limits:
+        cpu: 1
+        memory: 2Gi
+      requests:
+        cpu: 250m
+        memory: 2Gi

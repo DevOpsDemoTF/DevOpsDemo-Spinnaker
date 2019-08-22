@@ -11,5 +11,8 @@ kubeConfig:
   omittedNameSpaces:
     - kube-system
     - kube-public
+    - ingress
+    - oauth
+    - kubernetes-dashboard
   onlySpinnakerManaged:
     enabled: false

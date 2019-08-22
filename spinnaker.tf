@@ -18,8 +18,12 @@ resource "helm_release" "spinnaker" {
 
   timeout = 600
 
-  values = [data.template_file.spinnaker_values.rendered, data.template_file.docker_registry.rendered,
-    "dockerRegistryAccountSecret: ${kubernetes_secret.docker_registries.metadata.0.name}"]
+  values = [
+    file("templates/halyard.yaml"),
+    data.template_file.spinnaker_values.rendered,
+    data.template_file.docker_registry.rendered,
+    "dockerRegistryAccountSecret: ${kubernetes_secret.docker_registries.metadata.0.name}"
+  ]
 }
 
 resource "kubernetes_secret" "docker_registries" {
@@ -29,16 +33,16 @@ resource "kubernetes_secret" "docker_registries" {
   }
 
   data = {
-    "${var.environments.0}" = azuread_service_principal_password.spinnaker.value
+    "${lower(var.environments.0)}" = azuread_service_principal_password.spinnaker.value
   }
 }
 
 data "template_file" "docker_registry" {
   template = file("${path.module}/templates/registry.yaml")
   vars     = {
-    name    = var.environments[0]
+    name    = lower(var.environments[0])
     address = azurerm_container_registry.registry.login_server
-    username = azuread_service_principal.spinnaker.object_id
+    username = azuread_service_principal.spinnaker.application_id
   }
 }
 
