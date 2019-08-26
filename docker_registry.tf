@@ -1,5 +1,7 @@
 resource "azurerm_container_registry" "registry" {
-  name                = local.cname
+  count               = length(var.environments)
+
+  name                = "${local.cname}${var.environments[count.index].name}"
   location            = var.location
   resource_group_name = azurerm_resource_group.spinnaker.name
   admin_enabled       = false
@@ -7,13 +9,17 @@ resource "azurerm_container_registry" "registry" {
 }
 
 resource "azurerm_role_assignment" "spinnaker_acr" {
-  principal_id = azuread_service_principal.spinnaker.object_id
-  scope = azurerm_container_registry.registry.id
+  count = length(var.environments)
+
+  principal_id         = azuread_service_principal.spinnaker.object_id
+  scope                = azurerm_container_registry.registry[count.index].id
   role_definition_name = "AcrPush"
 }
 
 resource "azurerm_role_assignment" "kubernetes_acr" {
-  principal_id = var.k8s_service_principal
-  scope = azurerm_container_registry.registry.id
+  count = length(var.environments)
+
+  principal_id         = var.environments[count.index].principal
+  scope                = azurerm_container_registry.registry[count.index].id
   role_definition_name = "AcrPull"
 }

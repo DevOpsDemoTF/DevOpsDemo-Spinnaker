@@ -14,12 +14,12 @@ resource "kubernetes_ingress" "spinnaker_deck" {
 
   spec {
     tls {
-      hosts       = [var.k8s_fqdn]
+      hosts       = [var.domain]
       secret_name = "spinnaker-tls"
     }
 
     rule {
-      host = var.k8s_fqdn
+      host = var.domain
       http {
         path {
           path = "/spinnaker(/|$)(.*)"
@@ -49,12 +49,12 @@ resource "kubernetes_ingress" "spinnaker_gate" {
 
   spec {
     tls {
-      hosts       = [var.k8s_fqdn]
+      hosts       = [var.domain]
       secret_name = "spinnaker-tls"
     }
 
     rule {
-      host = var.k8s_fqdn
+      host = var.domain
       http {
         path {
           path = "/gate(/|$)(.*)"
