@@ -2,17 +2,18 @@ kubeConfig:
   # Use this when you want to register arbitrary clusters with Spinnaker
   # Upload your ~/kube/.config to a secret
   enabled: true
-  secretName: ${kube_config}
-  secretKey: config
+  secretName: ${secret_name}
+  secretKey: ${secret_key}
   # List of contexts from the kubeconfig to make available to Spinnaker
   contexts:
-    - default
-  deploymentContext: default
+${contexts}
+  deploymentContext: ${deployment}
   omittedNameSpaces:
     - kube-system
     - kube-public
     - ingress
     - oauth
     - kubernetes-dashboard
+    - spinnaker
   onlySpinnakerManaged:
-    enabled: false
+    enabled: true

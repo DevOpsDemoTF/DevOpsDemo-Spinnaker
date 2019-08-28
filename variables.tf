@@ -10,7 +10,8 @@ variable "environments" {
   type = list(object({
     name=string,
     principal=string,
-    kube_conf=string
+    kube_conf=string,
+    context=string,
   }))
 }
 

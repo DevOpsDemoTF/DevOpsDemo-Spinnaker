@@ -1,4 +1,6 @@
 halyard:
+  spinnakerVersion: 1.12.5
+
   # Set to false to disable persistence data volume for halyard
   persistence:
     enabled: false
