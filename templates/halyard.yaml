@@ -1,5 +1,8 @@
 halyard:
-  spinnakerVersion: 1.12.5
+  spinnakerVersion: 1.15.3
+  image:
+    repository: gcr.io/spinnaker-marketplace/halyard
+    tag: 1.23.0
 
   # Set to false to disable persistence data volume for halyard
   persistence:

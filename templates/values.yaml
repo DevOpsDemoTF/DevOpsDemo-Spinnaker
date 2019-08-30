@@ -32,7 +32,7 @@ spinnakerFeatureFlags:
   - artifacts
   - jobs
   - pipeline-templates
-  - infrastructure-stages
+  - managed-pipeline-templates-v2-ui
 
 # Node labels for pod assignment
 # Ref: https://kubernetes.io/docs/user-guide/node-selection/
