@@ -6,9 +6,6 @@ resource "kubernetes_ingress" "spinnaker_deck" {
     annotations = {
       "kubernetes.io/ingress.class"                = "nginx"
       "kubernetes.io/tls-acme"                     = "true"
-      "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
-      "nginx.ingress.kubernetes.io/auth-url"       = "https://$host/oauth2/auth"
-      "nginx.ingress.kubernetes.io/auth-signin"    = "https://$host/oauth2/start?rd=$request_uri"
     }
   }
 
@@ -22,7 +19,7 @@ resource "kubernetes_ingress" "spinnaker_deck" {
       host = var.domain
       http {
         path {
-          path = "/spinnaker(/|$)(.*)"
+          path = "/"
           backend {
             service_name = "spin-deck"
             service_port = "9000"
@@ -42,8 +39,6 @@ resource "kubernetes_ingress" "spinnaker_gate" {
       "kubernetes.io/ingress.class"                = "nginx"
       "kubernetes.io/tls-acme"                     = "true"
       "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
-      "nginx.ingress.kubernetes.io/auth-url"       = "https://$host/oauth2/auth"
-      "nginx.ingress.kubernetes.io/auth-signin"    = "https://$host/oauth2/start?rd=$request_uri"
     }
   }
 

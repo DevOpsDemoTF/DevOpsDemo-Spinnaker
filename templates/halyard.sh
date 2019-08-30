@@ -1,0 +1,2 @@
+hal --daemon-endpoint http://spinnaker-spinnaker-halyard:8064 config security authn oauth2 edit --client-id '${client_id}' --client-secret '${client_secret}' --provider azure --pre-established-redirect-uri '${callback_url}'
+hal --daemon-endpoint http://spinnaker-spinnaker-halyard:8064 config security authn oauth2 enable

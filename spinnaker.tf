@@ -19,22 +19,22 @@ resource "helm_release" "spinnaker" {
   chart         = "stable/spinnaker"
   namespace     = kubernetes_namespace.spinnaker.metadata.0.name
   force_update  = "true"
+  recreate_pods = "true"
 
-  timeout = 600
+  timeout = 1000
 
-  values = [file("${path.module}/templates/halyard.yaml"), data.template_file.spinnaker_values.rendered,
+  values = [data.template_file.halyard_config.rendered, data.template_file.spinnaker_values.rendered,
     local.registries_config, "dockerRegistryAccountSecret: ${kubernetes_secret.docker_registries.metadata.0.name}",
-    data.template_file.k8s_clusters.rendered
-  ]
+    data.template_file.k8s_clusters.rendered]
 }
 
-resource "kubernetes_secret" "docker_registries" {
-  metadata {
-    name      = "docker-registries"
-    namespace = kubernetes_namespace.spinnaker.metadata.0.name
+data "template_file" "halyard_config" {
+  template = file("${path.module}/templates/halyard.yaml")
+  vars     = {
+    halyard_config     = kubernetes_config_map.halyard_config.metadata.0.name
+    halyard_config_key = "halyard.sh"
+    azure_tenant       = data.azurerm_client_config.current.tenant_id
   }
-
-  data = {for e in var.environments:lower(e.name) => azuread_service_principal_password.spinnaker.value}
 }
 
 data "template_file" "docker_registry" {
@@ -55,18 +55,4 @@ data "template_file" "spinnaker_values" {
     storage_access_key     = azurerm_storage_account.spinnaker.primary_access_key
     storage_container_name = azurerm_storage_container.spinnaker.name
   }
-}
-
-resource "azurerm_storage_account" "spinnaker" {
-  name                     = local.cname
-  resource_group_name      = azurerm_resource_group.spinnaker.name
-  location                 = var.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-}
-
-resource "azurerm_storage_container" "spinnaker" {
-  name                  = "spinnaker"
-  storage_account_name  = azurerm_storage_account.spinnaker.name
-  container_access_type = "container"
 }

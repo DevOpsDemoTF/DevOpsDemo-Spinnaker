@@ -7,9 +7,9 @@ halyard:
   # Provide a config map with Hal commands that will be run the core config (storage)
   # The config map should contain a script in the config.sh key
   additionalScripts:
-    enabled: false
-    configMapName: my-halyard-config
-    configMapKey: config.sh
+    enabled: true
+    configMapName: ${halyard_config}
+    configMapKey: ${halyard_config_key}
     # If you'd rather do an inline script, set create to true and put the content in the data dict like you would a configmap
     # The content will be passed through `tpl`, so value interpolation is supported.
     create: false
@@ -42,7 +42,11 @@ halyard:
   ## Define custom settings for Spinnaker services. Read more for details:
   ## https://www.spinnaker.io/reference/halyard/custom/#custom-service-settings
   ## You can use it to add annotations for pods, override the image, etc.
-  additionalServiceSettings: {}
+  additionalServiceSettings:
+    gate.yml:
+      env:
+        azureTenantId: ${azure_tenant}
+
     # deck.yml:
     #   artifactId: gcr.io/spinnaker-marketplace/deck:2.9.0-20190412012808
     #   kubernetes:

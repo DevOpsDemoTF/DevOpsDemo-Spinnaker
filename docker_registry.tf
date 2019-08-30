@@ -23,3 +23,12 @@ resource "azurerm_role_assignment" "kubernetes_acr" {
   scope                = azurerm_container_registry.registry[count.index].id
   role_definition_name = "AcrPull"
 }
+
+resource "kubernetes_secret" "docker_registries" {
+  metadata {
+    name      = "docker-registries"
+    namespace = kubernetes_namespace.spinnaker.metadata.0.name
+  }
+
+  data = {for e in var.environments:lower(e.name) => azuread_service_principal_password.spinnaker.value}
+}
