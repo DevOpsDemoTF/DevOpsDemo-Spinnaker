@@ -28,7 +28,71 @@ halyard:
     ## Uncomment if you want to use a pre-created ConfigMap rather than feeding data in via helm.
     # name:
   additionalProfileConfigMaps:
-    data: {}
+    data:
+      orca-local.yml:
+        job:
+          preconfigured:
+            kubernetes:
+              - label: CopyDockerImage
+                type: copyDockerImage
+                description: Copy/promote a docker image from one registry to the other
+                cloudProvider: kubernetes
+                account: ${copy_image_context}
+                credentials: ${copy_image_context}
+                waitForCompletion: true
+                application: spinnaker
+                parameters:
+                  - name: SOURCE
+                    label: Source docker image uri
+                    description: Source uri to copy the image from (see https://github.com/containers/skopeo#copying-images).
+                    mapping: manifest.spec.template.spec.containers[0].env[0].value
+                    defaultValue: "docker://docker.io/nginx:1.17"
+                  - name: DESTINATION
+                    label: Destination docker image uri
+                    description: Destination uri to copy the image to (see https://github.com/containers/skopeo#copying-images).
+                    mapping: manifest.spec.template.spec.containers[0].env[1].value
+                    defaultValue: "docker://devopsdemospinnaker.azurecr.io/nginx:v1.17"
+                  - name: SOURCE_SECRET_KEY
+                    label: Source secret key
+                    description: 'The key that contains the source secret (format: "user:password")'
+                    mapping: manifest.spec.template.spec.containers[0].env[2].valueFrom.secretKeyRef.key
+                    defaultValue: "dev"
+                  - name: DESTINATION_SECRET_KEY
+                    label: Destination secret key
+                    description: 'The key that contains the destination secret (format: "user:password")'
+                    mapping: manifest.spec.template.spec.containers[0].env[3].valueFrom.secretKeyRef.key
+                    defaultValue: "prod"
+                manifest:
+                  apiVersion: batch/v1
+                  kind: Job
+                  metadata:
+                    name: copy-docker-image
+                    namespace: spinnaker
+                  spec:
+                    backoffLimit: 0
+                    template:
+                      spec:
+                        ttlSecondsAfterFinished: 600
+                        restartPolicy: Never
+                        containers:
+                          - name: copy-docker-image
+                            image: docker.io/butzist/copy-docker-image:latest
+                            env:
+                              - name: SOURCE
+                                value: invalid
+                              - name: DESTINATION
+                                value: invalid
+                              - name: SOURCE_CREDENTIALS
+                                valueFrom:
+                                  secretKeyRef:
+                                    name: ${copy_image_secrets}
+                                    key: invalid
+                              - name: DESTINATION_CREDENTIALS
+                                valueFrom:
+                                  secretKeyRef:
+                                    name: ${copy_image_secrets}
+                                    key: invalid
+
       ## if you're running spinnaker behind a reverse proxy such as a GCE ingress
       ## you may need the following profile settings for the gate profile.
       ## see https://github.com/spinnaker/spinnaker/issues/1630

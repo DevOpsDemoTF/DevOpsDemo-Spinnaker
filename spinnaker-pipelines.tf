@@ -25,3 +25,12 @@ resource "azurerm_storage_blob" "pipeline_deploy_to_dev" {
 
   depends_on = [local_file.pipeline_deploy_to_dev]
 }
+
+resource "kubernetes_secret" "copy_image_secrets" {
+  metadata {
+    name = "copy-image-secrets"
+    namespace = kubernetes_namespace.spinnaker.metadata.0.name
+  }
+
+  data = { for e in var.environments: lower(e.name) => "${azuread_service_principal.spinnaker.application_id}:${azuread_service_principal_password.spinnaker.value}" }
+}

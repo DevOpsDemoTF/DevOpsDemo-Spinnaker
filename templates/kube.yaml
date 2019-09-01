@@ -9,11 +9,12 @@ kubeConfig:
 ${contexts}
   deploymentContext: ${deployment}
   omittedNameSpaces:
+    - default
     - kube-system
     - kube-public
     - ingress
     - oauth
+    - cert-manager
     - kubernetes-dashboard
-    - spinnaker
   onlySpinnakerManaged:
     enabled: true

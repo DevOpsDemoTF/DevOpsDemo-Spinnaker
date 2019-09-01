@@ -34,6 +34,8 @@ data "template_file" "halyard_config" {
     halyard_config     = kubernetes_config_map.halyard_config.metadata.0.name
     halyard_config_key = "halyard.sh"
     azure_tenant       = data.azurerm_client_config.current.tenant_id
+    copy_image_context = var.environments[0].context
+    copy_image_secrets = kubernetes_secret.copy_image_secrets.metadata.0.name
   }
 }
 
