@@ -1,6 +1,6 @@
 {
   "schema": "v2",
-  "id": "deployToDEV",
+  "id": "${name}",
   "lastModifiedBy": "butzist@github.com",
   "tag": "latest",
   "updateTs": "1567195074937",
