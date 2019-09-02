@@ -1,0 +1,300 @@
+{
+  "schema": "v2",
+  "id": "${name}",
+  "lastModifiedBy": "butzist@github.com",
+  "tag": "latest",
+  "updateTs": "1567358415789",
+  "protect": true,
+  "metadata": {
+    "name": "Promote and deploy",
+    "description": "Promote Docker image to next stage and deploy",
+    "owner": "butzist@github.com",
+    "scopes": [
+      "global"
+    ]
+  },
+  "variables": [
+    {
+      "type": "string",
+      "description": "Name of repository/image in Docker registry",
+      "name": "name"
+    },
+    {
+      "type": "string",
+      "description": "Kubernetes namespace to deploy to",
+      "name": "namespace"
+    },
+    {
+      "type": "string",
+      "description": "Expose service at https://host/path",
+      "name": "host"
+    },
+    {
+      "type": "string",
+      "description": "Expose service at https://host/path",
+      "name": "path"
+    },
+    {
+      "type": "int",
+      "description": "Number of initial replicas",
+      "name": "replicas"
+    },
+    {
+      "type": "boolean",
+      "description": "Needs manual judgment",
+      "name": "manualJudgment",
+      "default": "true"
+    },
+    {
+      "type": "boolean",
+      "description": "Configure ingress",
+      "name": "ingress",
+      "default": "false"
+    },
+    {
+      "type": "string",
+      "description": "Kubernetes context for deployment",
+      "name": "deploymentContext"
+    },
+    {
+      "type": "string",
+      "description": "Hostname of source Docker registry",
+      "name": "srcRegistry"
+    },
+    {
+      "type": "string",
+      "description": "Hostname of destination Docker registry",
+      "name": "destRegistry"
+    },
+    {
+      "type": "string",
+      "description": "Source environment",
+      "name": "srcEnvironment"
+    },
+    {
+      "type": "string",
+      "description": "Destination environment",
+      "name": "destEnvironment"
+    },
+    {
+      "type": "string",
+      "description": "Tag",
+      "name": "tag"
+    }
+  ],
+  "pipeline": {
+    "keepWaitingPipelines": false,
+    "lastModifiedBy": "butzist@github.com",
+    "limitConcurrent": true,
+    "parameterConfig": [
+      {
+        "description": "Tag of the image to deploy",
+        "hasOptions": false,
+        "label": "Tag",
+        "name": "tag",
+        "pinned": true,
+        "required": true
+      }
+    ],
+    "stages": [
+      {
+        "failPipeline": true,
+        "instructions": "Confirm that the service works",
+        "isNew": true,
+        "judgmentInputs": [],
+        "name": "Manual Judgment",
+        "notifications": [],
+        "propagateAuthenticationContext": true,
+        "refId": "1",
+        "requisiteStageRefIds": [],
+        "stageEnabled": {
+          "expression": "$${ templateVariables.manualJudgment }",
+          "type": "expression"
+        },
+        "type": "manualJudgment"
+      },
+      {
+        "alias": "preconfiguredJob",
+        "name": "Copy Docker Image",
+        "parameters": {
+          "DESTINATION": "docker://$${ templateVariables.destRegistry }/$${ templateVariables.name }:$${ templateVariables.tag }",
+          "DESTINATION_SECRET_KEY": "$${ templateVariables.destEnvironment }",
+          "SOURCE": "docker://$${ templateVariables.srcRegistry }/$${ templateVariables.name }:$${ templateVariables.tag }",
+          "SOURCE_SECRET_KEY": "$${ templateVariables.srcEnvironment }"
+        },
+        "refId": "2",
+        "requisiteStageRefIds": [
+          "1"
+        ],
+        "type": "copyDockerImage"
+      },
+      {
+        "account": "$${ templateVariables.deploymentContext }",
+        "cloudProvider": "kubernetes",
+        "comments": "",
+        "manifestArtifactAccount": "embedded-artifact",
+        "manifests": [
+          {
+            "apiVersion": "apps/v1",
+            "kind": "Deployment",
+            "metadata": {
+              "name": "$${ templateVariables.name }",
+              "namespace": "$${ templateVariables.namespace }"
+            },
+            "spec": {
+              "replicas": "$${ templateVariables.replicas }",
+              "selector": {
+                "matchLabels": {
+                  "app": "$${ templateVariables.name }"
+                }
+              },
+              "template": {
+                "metadata": {
+                  "labels": {
+                    "app": "$${ templateVariables.name }"
+                  },
+                  "annotations": {
+                    "prometheus.io/scrape": "true"
+                  }
+                },
+                "spec": {
+                  "containers": [
+                    {
+                      "image": "$${ templateVariables.destRegistry }/$${ templateVariables.name }:v0.2.0",
+                      "name": "service",
+                      "readinessProbe": {
+                        "exec": {
+                          "command": [
+                            "wget",
+                            "-q",
+                            "-O",
+                            "-",
+                            "http://localhost:8080/health"
+                          ]
+                        },
+                        "timeoutSeconds": 1,
+                        "periodSeconds": 10,
+                        "successThreshold": 1,
+                        "failureThreshold": 3
+                      },
+                      "ports": [
+                        {
+                          "containerPort": 8080
+                        },
+                        {
+                          "containerPort": 9102
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+              "name": "$${ templateVariables.name }",
+              "namespace": "$${ templateVariables.namespace }"
+            },
+            "spec": {
+              "ports": [
+                {
+                  "name": "http",
+                  "port": 8080,
+                  "protocol": "TCP",
+                  "targetPort": 8080
+                }
+              ],
+              "selector": {
+                "app": "$${ templateVariables.name }"
+              }
+            }
+          }
+        ],
+        "moniker": {
+          "app": "$${ templateVariables.name }"
+        },
+        "name": "Deploy service",
+        "relationships": {
+          "loadBalancers": [],
+          "securityGroups": []
+        },
+        "source": "text",
+        "refId": "3",
+        "requisiteStageRefIds": [
+          "2"
+        ],
+        "type": "deployManifest"
+      },
+      {
+        "account": "$${ templateVariables.deploymentContext }",
+        "cloudProvider": "kubernetes",
+        "comments": "",
+        "manifestArtifactAccount": "embedded-artifact",
+        "manifests": [
+          {
+            "apiVersion": "extensions/v1beta1",
+            "kind": "Ingress",
+            "metadata": {
+              "annotations": {
+                "kubernetes.io/ingress.class": "nginx",
+                "kubernetes.io/tls-acme": "true",
+                "nginx.ingress.kubernetes.io/rewrite-target": "/$2"
+              },
+              "name": "$${ templateVariables.name }",
+              "namespace": "$${ templateVariables.namespace }"
+            },
+            "spec": {
+              "rules": [
+                {
+                  "host": "$${ templateVariables.host }",
+                  "http": {
+                    "paths": [
+                      {
+                        "backend": {
+                          "serviceName": "$${ templateVariables.name }",
+                          "servicePort": 8080
+                        },
+                        "path": "$${ templateVariables.path }(/|$)(.*)"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "tls": [
+                {
+                  "hosts": [
+                    "$${ templateVariables.host }"
+                  ],
+                  "secretName": "$${ templateVariables.name }-tls"
+                }
+              ]
+            }
+          }
+        ],
+        "moniker": {
+          "app": "$${ templateVariables.name }"
+        },
+        "name": "Configure ingress",
+        "relationships": {
+          "loadBalancers": [],
+          "securityGroups": []
+        },
+        "source": "text",
+        "refId": "4",
+        "requisiteStageRefIds": [
+          "3"
+        ],
+        "stageEnabled": {
+          "expression": "$${ templateVariables.ingress }",
+          "type": "expression"
+        },
+        "type": "deployManifest"
+      }
+    ],
+    "triggers": [],
+    "updateTs": "1567358415789"
+  }
+}

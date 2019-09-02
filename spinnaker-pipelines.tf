@@ -19,6 +19,15 @@ module "pipeline_deploy_to_dev" {
   }
 }
 
+module "pipeline_promote_and_deploy" {
+  source = "./pipeline"
+
+  name = "promoteAndDeploy"
+  storage = local.pipeline_storage
+  template = file("${path.module}/templates/pipeline_promote_and_deploy.json")
+  vars = {}
+}
+
 resource "kubernetes_secret" "copy_image_secrets" {
   metadata {
     name      = "copy-image-secrets"
